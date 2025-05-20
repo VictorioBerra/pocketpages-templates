@@ -25,9 +25,7 @@
   }
 </script>
 
-<% if (serverError) { %>
-  <div class="alert alert-error mb-4"><%= serverError %></div>
-<% } %>
+<%- include('server-error', { serverError }) %>
 
 <form method="post" class="p-6 max-w-sm mx-auto">
   <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">

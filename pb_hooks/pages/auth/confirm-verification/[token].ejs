@@ -18,8 +18,4 @@
   }
 </script>
 
-<% if (serverError) { %>
-  <div class="alert alert-error mb-4">
-    <%= serverError %>
-  </div>
-<% } %>
+<%- include('server-error', { serverError }) %>
