@@ -9,6 +9,8 @@ For OAuth, OTP, anonymous, MFA pull these in: https://github.com/benallfree/pock
 
 ## Notes
 
+`./pocketbase superuser upsert email pass`
+
 ### GlobalAPI vs ContextAPI
 
 pocketpages-plugin-auth internally uses api.pb() and globalApi.pb(). I found that is because in the onExtendContextApi, the api object is the context API merged with the globalApi

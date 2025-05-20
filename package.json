@@ -8,7 +8,9 @@
     "dev:css": "npx @tailwindcss/cli -i ./pb_hooks/app.tailwind.css -o ./pb_hooks/pages/assets/css/app.css --watch",
     "build:css": "npx @tailwindcss/cli -i ./pb_hooks/app.tailwind.css -o ./pb_hooks/pages/assets/css/app.css",
     "lint:ejs": "ejslint \"pb_hooks/**/*.ejs\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "download-pocketbase": "npm run preinstall",
+    "postinstall": "sh ./download-pocketbase.sh"
   },
   "keywords": [],
   "author": "",
