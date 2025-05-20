@@ -1,0 +1,70 @@
+<script server>
+  let serverError = null
+  let fieldErrors = {}
+
+  if (request.method === 'POST') {
+
+    const client = pb({ request });
+
+    const {
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    } = body()
+
+    if (newPassword !== confirmPassword) {
+      fieldErrors.password = { message: 'Passwords do not match' }
+      serverError = 'Passwords do not match'
+    } else {
+      try {
+            const user = client.collection('users').update(auth.id, {
+              oldPassword: currentPassword,
+              password: newPassword,
+              passwordConfirm: confirmPassword,
+            })
+
+          redirect(`/`, {
+            message: 'Password changed successfully, you will need to login again.',
+          })
+      } catch (e) {
+        // Try to extract field-level errors from PocketBase error response
+        if (e && e.response && e.response.data) {
+          fieldErrors = e.response.data
+        }
+        error = e.message
+      }
+    }
+  }
+</script>
+
+<h2 class="text-3xl font-bold mb-6">Change Password</h2>
+
+<% if (serverError) { %>
+<div class="alert alert-error mb-4"><%= serverError %></div>
+<% } %>
+
+<form method="post" class="card bg-base-100 shadow-md p-6 max-w-sm mx-auto space-y-4">
+
+  <div class="form-control">
+    <label class="label">
+      <span class="label-text">Current Password</span>
+    </label>
+    <input name="currentPassword" type="password" class="input input-bordered w-full" required />
+  </div>
+
+  <div class="form-control">
+    <label class="label">
+      <span class="label-text">New Password</span>
+    </label>
+    <input name="newPassword" type="password" class="input input-bordered w-full" required />
+  </div>
+
+  <div class="form-control">
+    <label class="label">
+      <span class="label-text">Confirm New Password</span>
+    </label>
+    <input name="confirmPassword" type="password" class="input input-bordered w-full" required />
+  </div>
+
+  <button type="submit" class="btn btn-primary w-full">Change Password</button>
+</form>

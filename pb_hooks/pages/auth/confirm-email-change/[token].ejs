@@ -1,0 +1,53 @@
+<script server>
+  const {
+    token
+  } = params
+
+  let serverError = null
+  let fieldErrors = {}
+
+  if (request.method === 'POST') {
+
+    const client = pb();
+
+    const {
+      password,
+    } = body()
+
+    try {
+        client.collection('users').confirmEmailChange(token, password);
+
+        redirect('/auth/login', {
+            message: 'Your email has been changed. You will need to login again.',
+        })
+      } catch (e) {
+        // Try to extract field-level errors from PocketBase error response
+        if (e && e.response && e.response.data) {
+          fieldErrors = e.response.data
+        }
+        error = e.message
+      }
+  }
+</script>
+
+<h2 class="text-3xl font-bold mb-6">Confirm Email Change</h2>
+
+<% if (serverError) { %>
+<div class="alert alert-error mb-4"><%= serverError %></div>
+<% } %>
+
+<form method="post" class="card bg-base-100 shadow-md p-6 max-w-sm mx-auto space-y-4">
+
+  <p class="text-sm text-gray-500 mb-4">
+    Please enter your password to confirm the email change.
+  </p>
+
+  <div class="form-control">
+    <label class="label">
+      <span class="label-text">Password</span>
+    </label>
+    <input name="password" type="password" class="input input-bordered w-full" required />
+  </div>
+
+  <button type="submit" class="btn btn-primary w-full">Confirm Email Change</button>
+</form>

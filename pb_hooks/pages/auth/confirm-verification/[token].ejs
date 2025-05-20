@@ -1,0 +1,25 @@
+<script server>
+  let serverError = null
+  
+  const {
+    token
+  } = params;
+
+  const client = pb();
+
+  try {
+    client.collection('users').confirmVerification(token);
+
+    redirect('/auth/login', {
+      message: 'Your account has been verified, you can now login.',
+    })
+  } catch (e) {
+    serverError = e.message
+  }
+</script>
+
+<% if (serverError) { %>
+  <div class="alert alert-error mb-4">
+    <%= serverError %>
+  </div>
+  <% } %>

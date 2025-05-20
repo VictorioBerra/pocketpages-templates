@@ -1,0 +1,47 @@
+<script server>
+    let serverError = null
+    let fieldErrors = {}
+
+    if (request.method === 'POST') {
+
+        const client = pb({ request });
+
+        const {
+            newEmail,
+        } = body()
+
+        try {
+            const user = client.collection('users').requestEmailChange(newEmail)
+
+            redirect(`/`, {
+                message: 'Email change requested, please check your email.',
+            })
+        } catch (e) {
+            // Try to extract field-level errors from PocketBase error response
+            if (e && e.response && e.response.data) {
+                fieldErrors = e.response.data
+            }
+            error = e.message
+        }
+    }
+</script>
+
+<h2 class="text-3xl font-bold mb-6">Change Email</h2>
+
+<% if (serverError) { %>
+    <div class="alert alert-error mb-4">
+        <%= serverError %>
+    </div>
+    <% } %>
+
+        <form method="post" class="card bg-base-100 shadow-md p-6 max-w-sm mx-auto space-y-4">
+
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">New Email</span>
+                </label>
+                <input name="newEmail" class="input input-bordered w-full" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full">Change Email</button>
+        </form>

@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  pocketbase:
+    build:
+      context: .
+      args:
+        PB_VERSION: 0.28.1
+    container_name: pocketbase-app
+    ports:
+      - "8090:8080"
+    volumes:
+      - ./pb_data:/pb/pb_data
+    restart: unless-stopped

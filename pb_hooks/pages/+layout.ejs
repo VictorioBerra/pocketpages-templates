@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>PocketBase PocketPages Starter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="<%=asset('/assets/css/app.css')%>" rel="stylesheet" />
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+
+<body>
+  <header class="navbar bg-base-100">
+    <div class="navbar-start">
+      <a href="/" class="btn btn-ghost normal-case text-xl">PocketPages</a>
+    </div>
+    <div class="navbar-center lg:flex">
+      <ul class="menu menu-horizontal px-1">
+        <li><a href="/">Home</a></li>
+        <% if (auth) { %>
+        <li><a href="/account">Account</a></li>
+        <li><a href="/auth/logout">Logout</a></li>
+        <% } else { %>
+        <li><a href="/auth/login">Login</a></li>
+        <li><a href="/auth/register">Register</a></li>
+        <% } %>
+      </ul>
+    </div>
+    <div class="navbar-end">
+      <% if(params.__flash) { %>
+      <div class="alert alert-info shadow-sm"><%= params.__flash %></div>
+      <% } %>
+    </div>
+  </header>
+  <main class="container mx-auto p-4">
+    <%- slot %>
+  </main>
+  <script src="https://unpkg.com/pocketbase/dist/pocketbase.umd.js"></script>
+  <script>
+    const pb = new PocketBase(window.location.origin)
+    console.log({
+      pb
+    })
+  </script>
+
+</body>
+
+</html>
