@@ -15,39 +15,37 @@
     } = body()
 
     try {
-        client.collection('users').confirmEmailChange(token, password);
+      client.collection('users').confirmEmailChange(token, password);
 
-        redirect('/auth/login', {
-            message: 'Your email has been changed. You will need to login again.',
-        })
-      } catch (e) {
-        // Try to extract field-level errors from PocketBase error response
-        if (e && e.response && e.response.data) {
-          fieldErrors = e.response.data
-        }
-        error = e.message
+      redirect('/auth/login', {
+        message: 'Your email has been changed. You will need to login again.',
+      })
+    } catch (e) {
+      // Try to extract field-level errors from PocketBase error response
+      if (e && e.response && e.response.data) {
+        fieldErrors = e.response.data
       }
+      error = e.message
+    }
   }
 </script>
 
-<h2 class="text-3xl font-bold mb-6">Confirm Email Change</h2>
-
 <% if (serverError) { %>
-<div class="alert alert-error mb-4"><%= serverError %></div>
+  <div class="alert alert-error mb-4">
+    <%= serverError %>
+  </div>
 <% } %>
 
-<form method="post" class="card bg-base-100 shadow-md p-6 max-w-sm mx-auto space-y-4">
+<form method="post" class="p-6 max-w-sm mx-auto space-y-4">
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
 
-  <p class="text-sm text-gray-500 mb-4">
-    Please enter your password to confirm the email change.
-  </p>
+    <legend class="fieldset-legend">Change Password</legend>
 
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">Password</span>
-    </label>
-    <input name="password" type="password" class="input input-bordered w-full" required />
-  </div>
+    <p class="text-sm text-gray-500 mb-4">
+      Please enter your password to confirm the email change.
+    </p>
 
-  <button type="submit" class="btn btn-primary w-full">Confirm Email Change</button>
+    <input name="confirmPassword" type="password" class="input input-bordered w-full" required />
+    <button class="btn btn-neutral mt-4">Confirm Email Change</button>
+  </fieldset>
 </form>

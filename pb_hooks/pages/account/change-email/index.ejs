@@ -26,22 +26,18 @@
     }
 </script>
 
-<h2 class="text-3xl font-bold mb-6">Change Email</h2>
-
 <% if (serverError) { %>
     <div class="alert alert-error mb-4">
         <%= serverError %>
     </div>
-    <% } %>
+<% } %>
 
-        <form method="post" class="card bg-base-100 shadow-md p-6 max-w-sm mx-auto space-y-4">
+<form method="post" class="p-6 max-w-sm mx-auto space-y-4">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+        <legend class="fieldset-legend">Change Email</legend>
 
-            <div class="form-control">
-                <label class="label">
-                    <span class="label-text">New Email</span>
-                </label>
-                <input name="newEmail" class="input input-bordered w-full" required />
-            </div>
-
-            <button type="submit" class="btn btn-primary w-full">Change Email</button>
-        </form>
+        <label class="label">New Email</label>
+        <input name="newEmail" class="input input-bordered w-full" required />
+        <button class="btn btn-neutral mt-4">Change Email</button>
+    </fieldset>
+</form>

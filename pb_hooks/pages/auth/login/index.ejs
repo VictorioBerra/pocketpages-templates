@@ -10,8 +10,17 @@
     } = body()
 
     try {
-      const user = signInWithPassword(identity, password)
-      redirect(`/`)
+      const authData = pb()
+        .collection('users')
+        .authWithPassword(identity, password);
+
+      if (authData.record.verified) {
+        api.signIn(authData)
+        redirect(`/`)
+      } else {
+        // If the user is not verified, show an error message
+        serverError = 'Please verify your email address before logging in.'
+      }
     } catch (e) {
       // Try to extract field-level errors from PocketBase error response
       if (e && e.response && e.response.data) {
@@ -22,37 +31,35 @@
   }
 </script>
 
-<h3 class="text-2xl font-bold mb-6">Password Login</h3>
-
 <% if (serverError) { %>
-<div class="alert alert-error mb-4"><%= serverError %></div>
+  <div class="alert alert-error mb-4">
+    <%= serverError %>
+  </div>
 <% } %>
 
-<form method="post" class="card bg-base-100 shadow-md p-6 max-w-sm mx-auto space-y-4">
+<form method="post" class="p-6 max-w-sm mx-auto">
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+    <legend class="fieldset-legend">Login</legend>
 
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">Email</span>
-    </label>
-    <input name="identity" value="<%= data.identity %>" class="input input-bordered w-full validator" required />
-    <% if (fieldErrors && fieldErrors.email) { %>
-      <p class="validator-hint text-error mt-1"><%= fieldErrors.email.message %></p>
-    <% } %>    
-  </div>
+    <label class="label">Email</label>
+    <input name="identity" value="<%= data.identity %>" type="email" class="input" placeholder="Email" required />
+      <% if (fieldErrors && fieldErrors.email) { %>
+      <p class="validator-hint text-error mt-1">
+        <%= fieldErrors.email.message %>
+      </p>
+      <% } %>
 
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">Password</span>
-    </label>
-    <input name="password" type="password" class="input input-bordered w-full validator" required />
-    <% if (fieldErrors && fieldErrors.password) { %>
-      <p class="validator-hint text-error mt-1"><%= fieldErrors.password.message %></p>
-    <% } %>    
-  </div>
+      <label class="label">Password</label>
+      <input name="password" type="password" class="input" placeholder="Password" required />
+      <% if (fieldErrors && fieldErrors.password) { %>
+      <p class="validator-hint text-error mt-1">
+        <%= fieldErrors.password.message %>
+      </p>
+      <% } %>
 
-  <button type="submit" class="btn btn-primary w-full">Login</button>
-
-  <div class="text-center mt-2">
-    <a href="/auth/forgot" class="link link-primary">Forgot Password?</a>
-  </div>
+      <button type="submit" class="btn btn-neutral mt-4">Login</button>
+      <div class="text-center mt-2">
+        <a href="/auth/forgot" class="link link-primary">Forgot Password?</a>
+      </div>
+  </fieldset>
 </form>

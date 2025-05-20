@@ -10,7 +10,9 @@
 
     try {
       createUser(identity, password)
-      redirect(`/auth/register/success`)
+      redirect(`/`, {
+        message: 'Registration successful. Please check your email to verify your account.'
+      })
     } catch (e) {
       // Try to extract field-level errors from PocketBase error response
       if (e && e.response && e.response.data) {
@@ -21,39 +23,26 @@
   }
 </script>
 
-<h2 class="text-3xl font-bold mb-6">Register</h2>
-
 <% if (serverError) { %>
 <div class="alert alert-error mb-4"><%= serverError %></div>
 <% } %>
 
-<form method="post" class="card bg-base-100 shadow-md p-6 max-w-sm mx-auto space-y-4">
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">Email Address</span>
-    </label>
-    <input 
-      name="identity" 
-      value="<%= data.identity %>" 
-      class="input input-bordered w-full validator" 
-      required 
-      pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" 
-      minlength="5" 
-      maxlength="254" />
+<form method="post" class="p-6 max-w-sm mx-auto">
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+    <legend class="fieldset-legend">Register</legend>
+
+    <label class="label">Email Address</label>
+    <input name="identity" value="<%= data.identity %>" type="email" class="input" placeholder="Email" required pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" minlength="5" maxlength="254" />
     <% if (fieldErrors && fieldErrors.email) { %>
       <p class="validator-hint text-error mt-1"><%= fieldErrors.email.message %></p>
     <% } %>
-  </div>
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">Password</span>
-    </label>
-    <input name="password" type="password" value="<%= data.password %>" class="input input-bordered w-full validator" required 
-      minlength="8" 
-      maxlength="254"/>
+
+    <label class="label">Password</label>
+    <input name="password" type="password" value="<%= data.password %>" class="input" placeholder="Password" required minlength="8" maxlength="254" />
     <% if (fieldErrors && fieldErrors.password) { %>
       <p class="validator-hint text-error mt-1"><%= fieldErrors.password.message %></p>
     <% } %>
-  </div>
-  <button type="submit" class="btn btn-primary w-full">Register</button>
+
+    <button type="submit" class="btn btn-neutral mt-4">Register</button>
+  </fieldset>
 </form>

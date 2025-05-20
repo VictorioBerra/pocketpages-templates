@@ -25,23 +25,20 @@
   }
 </script>
 
-<h3 class="text-2xl font-bold mb-6">Forgot Password</h3>
-
 <% if (serverError) { %>
-<div class="alert alert-error mb-4"><%= serverError %></div>
+  <div class="alert alert-error mb-4"><%= serverError %></div>
 <% } %>
 
-<form method="post" class="card bg-base-100 shadow-md p-6 max-w-sm mx-auto space-y-4">
+<form method="post" class="p-6 max-w-sm mx-auto">
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+    <legend class="fieldset-legend">Forgot Password</legend>
 
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">Email</span>
-    </label>
-    <input name="email" value="<%= data.identity %>" class="input input-bordered w-full validator" required />
+    <label class="label">Email</label>
+    <input name="email" value="<%= data.identity %>" type="email" class="input" placeholder="Email" required />
     <% if (fieldErrors && fieldErrors.email) { %>
       <p class="validator-hint text-error mt-1"><%= fieldErrors.email.message %></p>
-    <% } %>    
-  </div>
+    <% } %>
 
-  <button type="submit" class="btn btn-primary w-full">Reset Password</button>
+    <button type="submit" class="btn btn-neutral mt-4">Reset Password</button>
+  </fieldset>
 </form>

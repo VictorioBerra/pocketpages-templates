@@ -17,15 +17,15 @@
       serverError = 'Passwords do not match'
     } else {
       try {
-            const user = client.collection('users').update(auth.id, {
-              oldPassword: currentPassword,
-              password: newPassword,
-              passwordConfirm: confirmPassword,
-            })
+        const user = client.collection('users').update(auth.id, {
+          oldPassword: currentPassword,
+          password: newPassword,
+          passwordConfirm: confirmPassword,
+        })
 
-          redirect(`/`, {
-            message: 'Password changed successfully, you will need to login again.',
-          })
+        redirect(`/`, {
+          message: 'Password changed successfully, you will need to login again.',
+        })
       } catch (e) {
         // Try to extract field-level errors from PocketBase error response
         if (e && e.response && e.response.data) {
@@ -37,34 +37,26 @@
   }
 </script>
 
-<h2 class="text-3xl font-bold mb-6">Change Password</h2>
-
 <% if (serverError) { %>
-<div class="alert alert-error mb-4"><%= serverError %></div>
+  <div class="alert alert-error mb-4">
+    <%= serverError %>
+  </div>
 <% } %>
 
-<form method="post" class="card bg-base-100 shadow-md p-6 max-w-sm mx-auto space-y-4">
+<form method="post" class="p-6 max-w-sm mx-auto space-y-4">
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
 
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">Current Password</span>
-    </label>
+    <legend class="fieldset-legend">Change Password</legend>
+
+    <label class="label">Current Password</label>
     <input name="currentPassword" type="password" class="input input-bordered w-full" required />
-  </div>
 
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">New Password</span>
-    </label>
+    <label class="label">New Password</label>
     <input name="newPassword" type="password" class="input input-bordered w-full" required />
-  </div>
 
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">Confirm New Password</span>
-    </label>
+    <label class="label">Confirm New Password</label>
     <input name="confirmPassword" type="password" class="input input-bordered w-full" required />
-  </div>
 
-  <button type="submit" class="btn btn-primary w-full">Change Password</button>
+    <button class="btn btn-neutral mt-4">Change Password</button>
+  </fieldset>
 </form>

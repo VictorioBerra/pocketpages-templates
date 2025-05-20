@@ -40,27 +40,20 @@
   }
 </script>
 
-<h2 class="text-3xl font-bold mb-6">Password Reset</h2>
-
 <% if (serverError) { %>
 <div class="alert alert-error mb-4"><%= serverError %></div>
 <% } %>
 
-<form method="post" class="card bg-base-100 shadow-md p-6 max-w-sm mx-auto space-y-4">
+<form method="post" class="p-6 max-w-sm mx-auto">
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+    <legend class="fieldset-legend">Password Reset</legend>
 
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">New Password</span>
-    </label>
-    <input name="newPassword" type="password" class="input input-bordered w-full" required />
-  </div>
+      <label class="label">New Password</label>
+      <input name="newPassword" type="password" class="input input-bordered w-full" required />
 
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">Confirm New Password</span>
-    </label>
-    <input name="confirmPassword" type="password" class="input input-bordered w-full" required />
-  </div>
+      <label class="label">Confirm New Password</label>
+      <input name="confirmPassword" type="password" class="input input-bordered w-full" required />
 
-  <button type="submit" class="btn btn-primary w-full">Change Password</button>
+    <button type="submit" class="btn btn-neutral mt-4">Reset Password</button>
+  </fieldset>
 </form>
