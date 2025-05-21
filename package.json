@@ -17,6 +17,9 @@
   "dependencies": {
     "@tailwindcss/cli": "^4.1.6",
     "@tailwindcss/typography": "^0.5.16",
+    "ajv": "^8.17.1",
+    "ajv-errors": "^3.0.0",
+    "ajv-formats": "^3.0.1",
     "daisyui": "^5.0.35",
     "pocketpages": "^0.16.0",
     "pocketpages-plugin-auth": "^0.2.0",
