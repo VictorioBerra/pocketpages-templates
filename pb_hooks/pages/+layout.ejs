@@ -10,29 +10,36 @@
 </head>
 
 <body>
-  <header class="navbar bg-base-100">
-    <div class="navbar-start">
+  <header class="navbar bg-base-100 shadow-sm">
+    <div class="flex-1">
       <a href="/" class="btn btn-ghost normal-case text-xl">PocketPages</a>
     </div>
-    <div class="navbar-center lg:flex">
+    <div class="flex-none">
       <ul class="menu menu-horizontal px-1">
-        <li><a href="/">Home</a></li>
         <% if (auth) { %>
-        <li><a href="/account">Account</a></li>
-        <li><a href="/auth/logout">Logout</a></li>
+          <li>
+            <details>
+              <summary>Account</summary>
+              <ul class="bg-base-100 rounded-t-none p-2">
+                <li><a href="/account/change-email">Change Email</a></li>
+                <li><a href="/account/change-password">Change Password</a></li>
+                <li><a href="/account/logout">Logout</a></li>
+              </ul>
+            </details>
+          </li>          
         <% } else { %>
-        <li><a href="/auth/login">Login</a></li>
-        <li><a href="/auth/register">Register</a></li>
+          <li><a href="/auth/login">Login</a></li>
+          <li><a href="/auth/register">Register</a></li>
         <% } %>
       </ul>
     </div>
-    <div class="navbar-end">
-      <% if(params.__flash) { %>
-      <div class="alert alert-info shadow-sm"><%= params.__flash %></div>
-      <% } %>
-    </div>
   </header>
   <main class="container mx-auto p-4">
+
+      <% if(params.__flash) { %>
+        <div class="alert alert-info shadow-sm mb-4"><%= params.__flash %></div>
+      <% } %>
+
     <%- slot %>
   </main>
   <script src="https://unpkg.com/pocketbase/dist/pocketbase.umd.js"></script>
