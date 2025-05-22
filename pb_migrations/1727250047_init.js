@@ -7,9 +7,8 @@ migrate((app) => {
 
     const smtp = settings.smtp
     smtp.enabled = true
-    smtp.host = 'mail.smtp2go.com'
-    smtp.port = 587
-    smtp.username = 'pocketbase-app1'
+    smtp.host = 'localhost'
+    smtp.port = 1025
 
     app.save(settings)
 }, (app) => {

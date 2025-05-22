@@ -9,6 +9,12 @@ services:
     container_name: pocketbase-app
     ports:
       - "8090:8080"
-    volumes:
-      - ./pb_data:/pb/pb_data
-    restart: unless-stopped
+    # volumes:
+    #   - ./pb_data:/pb/pb_data
+  mailhog:
+    image: mailhog/mailhog
+    logging:
+      driver: 'none'  # disable saving logs
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
