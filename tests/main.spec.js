@@ -43,17 +43,21 @@ test('register an account', async ({ page }) => {
   // 1. Remove soft line breaks (quoted-printable)
   const cleanedBody = body.replace(/=\r?\n/g, '');
 
-  // 2. Extract the URL
-  const match = cleanedBody.match(/\[Verify\]\((http[^\s\)]+)\)/);
-  const verifyLink = match ? match[1] : null;
+  const match = cleanedBody.match(/\[Verify\]\((.*)\)/i);
 
-  console.log(verifyLink);
+  const cleanedVerifyLink = match ? match[1] : null;
+
+  console.log(cleanedVerifyLink);
+
+  // thread sleep
+  await new Promise(resolve => setTimeout(resolve, 30000));
 
   // Go to the verification link
-  await page.goto(verifyLink);
+  await page.goto(cleanedVerifyLink);
 
   // Check if the verification was successful, page should include a div with the text "Email address verified. You can now log in."
-  await page.waitForURL(new RegExp(`${host}/auth/login`));
+  await page.waitForURL(new RegExp(`${host}/auth/login?__flash=.+`));
+
   const loginMessage = await page.locator('div').filter({ hasText: /Your account has been verified*/i });
 
   expect(await successMessage.count()).toBe(1);
