@@ -1,39 +1,83 @@
 <script server>
-    let serverError = null
-    let fieldErrors = {}
 
-    if (request.method === 'POST') {
+  const Ajv = require("ajv");
+  const ajv = new Ajv({ allErrors: true });
+  const addFormats = require("ajv-formats")
+  addFormats(ajv)
+  require("ajv-errors")(ajv);
 
-        const client = pb({ request });
+  const {
+    validateFormWithSchema,
+    handlePocketbaseError
+  } = resolve('form-helpers');
 
-        const {
-            newEmail,
-        } = body()
+  // ajv schema for login
+  const loginSchema = {
+    type: 'object',
+    required: ['identity'],
+    properties: {
+      identity: {
+        type: 'string',
+        format: 'email',
+      },
+    },
+    errorMessage: {
+      type: 'Invalid data type',
+      required: {
+        identity: 'Email is required',
+      },
+      properties: {
+        identity: 'Invalid email address',
+      }
+    },
+    additionalProperties: false
+  };
 
-        try {
-            const user = client.collection('users').requestEmailChange(newEmail)
+  let serverError = null
+  let fieldErrors = {}
+  let data = {}
 
-            redirect(`/`, {
-                message: 'Email change requested, please check your email.',
-            })
-        } catch (e) {
-            // Try to extract field-level errors from PocketBase error response
-            if (e && e.response && e.response.data) {
-                fieldErrors = e.response.data
-            }
-            error = e.message
-        }
+  if (request.method === 'POST') {
+
+    data = formData();
+
+    const validation = validateFormWithSchema(data, loginSchema, ajv, dbg);
+    if (!validation.valid) {
+      fieldErrors = validation.fieldErrors;
+      serverError = validation.serverError;
+    } else {
+      try {
+        const user = pb({ request }).collection('users').requestEmailChange(data.identity)
+        redirect(`/`, {
+            message: 'Email change requested, please check your email.',
+        })
+      } catch (e) {
+        const handled = handlePocketbaseError(e, dbg);
+        fieldErrors = handled.fieldErrors;
+        serverError = handled.serverError;
+      }
     }
+  }
 </script>
 
-<%- include('server-error', { serverError }) %>
+  <form method="post" class="p-6 max-w-sm mx-auto">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
-<form method="post" class="p-6 max-w-sm mx-auto space-y-4">
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-        <legend class="fieldset-legend">Change Email</legend>
+      <%- include('server-error', { serverError }) %>
 
-        <label class="label">New Email</label>
-        <input name="newEmail" class="input input-bordered w-full" required />
-        <button class="btn btn-neutral mt-4">Change Email</button>
+      <legend class="fieldset-legend">Change Email</legend>
+
+      <label class="label">Email</label>
+      <input 
+        name="identity" 
+        value="<%= data.identity %>" 
+        type="email"
+        class="validator input<%= fieldErrors && fieldErrors.identity ? ' input-error' : '' %>" 
+        placeholder="Email"
+        required="required" />
+      <%- include('field-error', { fieldName: "identity", fieldErrors }) %>
+      <div class="validator-hint">Enter valid email address</div>
+
+      <button type="submit" class="btn btn-neutral mt-4">Change Email</button>
     </fieldset>
-</form>
+  </form>

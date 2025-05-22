@@ -19,9 +19,12 @@
       identity: {
         type: 'string',
         format: 'email',
-        minLength: 6,
       },
-      password: { type: 'string', minLength: 6 }
+      password: { 
+        type: 'string', 
+        minLength: 8,
+        maxLength: 71,
+      }
     },
     errorMessage: {
       type: 'Invalid data type',
@@ -31,7 +34,7 @@
       },
       properties: {
         identity: 'Invalid email address',
-        password: 'Password must be at least 6 characters long'
+        password: 'Password is invalid'
       }
     },
     additionalProperties: false
@@ -54,7 +57,6 @@
         const authData = pb()
           .collection('users')
           .authWithPassword(data.identity, data.password);
-
         if (authData.record.verified) {
           api.signIn(authData)
           redirect(`/`)

@@ -1,23 +1,72 @@
 <script server>
+
+  const Ajv = require("ajv");
+  const ajv = new Ajv({ allErrors: true });
+  const addFormats = require("ajv-formats")
+  addFormats(ajv)
+  require("ajv-errors")(ajv);
+
+  const {
+    validateFormWithSchema,
+    handlePocketbaseError
+  } = resolve('form-helpers');
+
+  const {
+    token
+  } = params
+
+  // ajv schema for login
+  const loginSchema = {
+    type: 'object',
+    required: ['password', 'confirmPassword'],
+    properties: {    
+      currentPassword: { 
+        type: 'string', 
+        minLength: 8,
+        maxLength: 71,
+      },
+      newPassword: { 
+        type: 'string', 
+        minLength: 8,
+        maxLength: 71,
+      },
+      confirmPassword: { 
+        type: 'string', 
+        minLength: 8,
+        maxLength: 71,
+      }
+    },
+    errorMessage: {
+      type: 'Invalid data type',
+      required: {
+        currentPassword: 'Current Password is required',
+        newPassword: 'Password is required',
+        confirmPassword: 'Confirm Password is required'
+      },
+      properties: {
+        currentPassword: 'Current Password is invalid',
+        newPassword: 'Password is invalid',
+        confirmPassword: 'Confirm Password is invalid'
+      }
+    },
+    additionalProperties: false
+  };
+
   let serverError = null
   let fieldErrors = {}
+  let data = {}
 
   if (request.method === 'POST') {
 
-    const client = pb({ request });
+    data = formData();
 
-    const {
-      currentPassword,
-      newPassword,
-      confirmPassword,
-    } = body()
-
-    if (newPassword !== confirmPassword) {
-      fieldErrors.password = { message: 'Passwords do not match' }
-      serverError = 'Passwords do not match'
+    const validation = validateFormWithSchema(data, loginSchema, ajv, dbg);
+    if (!validation.valid) {
+      fieldErrors = validation.fieldErrors;
+      serverError = validation.serverError;
     } else {
       try {
-        const user = client.collection('users').update(auth.id, {
+        const user = pb({ request }).collection('users').update(auth.id, {
           oldPassword: currentPassword,
           password: newPassword,
           passwordConfirm: confirmPassword,
@@ -27,32 +76,57 @@
           message: 'Password changed successfully, you will need to login again.',
         })
       } catch (e) {
-        // Try to extract field-level errors from PocketBase error response
-        if (e && e.response && e.response.data) {
-          fieldErrors = e.response.data
-        }
-        error = e.message
+        const handled = handlePocketbaseError(e, dbg);
+        fieldErrors = handled.fieldErrors;
+        serverError = handled.serverError;
       }
     }
   }
 </script>
 
-<%- include('server-error', { serverError }) %>
+  <form method="post" class="p-6 max-w-sm mx-auto">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
-<form method="post" class="p-6 max-w-sm mx-auto space-y-4">
-  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+      <%- include('server-error', { serverError }) %>
 
-    <legend class="fieldset-legend">Change Password</legend>
+      <legend class="fieldset-legend">Change Password</legend>
 
-    <label class="label">Current Password</label>
-    <input name="currentPassword" type="password" class="input input-bordered w-full" required />
+      <label class="label">Current Password</label>
+      <input 
+        name="currentPassword" 
+        type="password" 
+        class="validator input<%= fieldErrors && fieldErrors.currentPassword ? ' input-error' : '' %>" 
+        placeholder="Current Password"
+        minlength="8"
+        maxlength="71"
+        required="required"/>
+      <%- include('field-error', { fieldName: "currentPassword", fieldErrors }) %>
+      <div class="validator-hint">Enter valid current password</div>
 
-    <label class="label">New Password</label>
-    <input name="newPassword" type="password" class="input input-bordered w-full" required />
+      <label class="label">New Password</label>
+      <input 
+        name="newPassword" 
+        type="password" 
+        class="validator input<%= fieldErrors && fieldErrors.newPassword ? ' input-error' : '' %>" 
+        placeholder="New Password"
+        minlength="8"
+        maxlength="71"
+        required="required"/>
+      <%- include('field-error', { fieldName: "newPassword", fieldErrors }) %>
+      <div class="validator-hint">Enter valid new password</div>
 
-    <label class="label">Confirm New Password</label>
-    <input name="confirmPassword" type="password" class="input input-bordered w-full" required />
+      <label class="label">Confirm Password</label>
+      <input 
+        name="confirmPassword" 
+        type="password" 
+        class="validator input<%= fieldErrors && fieldErrors.confirmPassword ? ' input-error' : '' %>" 
+        placeholder="Confirm Password"
+        minlength="8"
+        maxlength="71"
+        required="required"/>
+      <%- include('field-error', { fieldName: "confirmPassword", fieldErrors }) %>
+      <div class="validator-hint">Enter valid confirm password</div>
 
-    <button class="btn btn-neutral mt-4">Change Password</button>
-  </fieldset>
-</form>
+      <button type="submit" class="btn btn-neutral mt-4">Change Password</button>
+    </fieldset>
+  </form>

@@ -1,46 +1,102 @@
 <script server>
+
+  const Ajv = require("ajv");
+  const ajv = new Ajv({ allErrors: true });
+  const addFormats = require("ajv-formats")
+  addFormats(ajv)
+  require("ajv-errors")(ajv);
+
+  const {
+    validateFormWithSchema,
+    handlePocketbaseError
+  } = resolve('form-helpers');
+
+  // ajv schema for login
+  const loginSchema = {
+    type: 'object',
+    required: ['identity', 'password'],
+    properties: {
+      identity: {
+        type: 'string',
+        format: 'email',
+      },
+      password: { 
+        type: 'string', 
+        minLength: 8,
+        maxLength: 71,
+      }
+    },
+    errorMessage: {
+      type: 'Invalid data type',
+      required: {
+        identity: 'Email is required',
+        password: 'Password is required'
+      },
+      properties: {
+        identity: 'Invalid email address',
+        password: 'Password is not valid'
+      }
+    },
+    additionalProperties: false
+  };
+
   let serverError = null
   let fieldErrors = {}
+  let data = {}
 
   if (request.method === 'POST') {
-    const {
-      identity,
-      password
-    } = body()
 
-    try {
-      createUser(identity, password)
-      redirect(`/`, {
-        message: 'Registration successful. Please check your email to verify your account.'
-      })
-    } catch (e) {
-      // Try to extract field-level errors from PocketBase error response
-      if (e && e.response && e.response.data) {
-        fieldErrors = e.response.data
+    data = formData();
+
+    const validation = validateFormWithSchema(data, loginSchema, ajv, dbg);
+    if (!validation.valid) {
+      fieldErrors = validation.fieldErrors;
+      serverError = validation.serverError;
+    } else {
+      try {
+        createUser(data.identity, data.password)
+        redirect(`/`, {
+          message: 'Registration successful. Please check your email to verify your account.'
+        })
+      } catch (e) {
+        const handled = handlePocketbaseError(e, dbg);
+        fieldErrors = handled.fieldErrors;
+        serverError = handled.serverError;
       }
-      serverError = e.message || 'Registration failed.'
     }
   }
 </script>
 
-<%- include('server-error', { serverError }) %>
+  <form method="post" class="p-6 max-w-sm mx-auto">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
-<form method="post" class="p-6 max-w-sm mx-auto">
-  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-    <legend class="fieldset-legend">Register</legend>
+      <%- include('server-error', { serverError }) %>
 
-    <label class="label">Email Address</label>
-    <input name="identity" value="<%= data.identity %>" type="email" class="input" placeholder="Email" required pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" minlength="5" maxlength="254" />
-    <% if (fieldErrors && fieldErrors.email) { %>
-      <p class="validator-hint text-error mt-1"><%= fieldErrors.email.message %></p>
-    <% } %>
+      <legend class="fieldset-legend">Register</legend>
 
-    <label class="label">Password</label>
-    <input name="password" type="password" value="<%= data.password %>" class="input" placeholder="Password" required minlength="8" maxlength="254" />
-    <% if (fieldErrors && fieldErrors.password) { %>
-      <p class="validator-hint text-error mt-1"><%= fieldErrors.password.message %></p>
-    <% } %>
+      <label class="label">Email</label>
+      <input 
+        name="identity" 
+        value="<%= data.identity %>" 
+        type="email"
+        class="validator input<%= fieldErrors && fieldErrors.identity ? ' input-error' : '' %>" 
+        placeholder="Email"
+        required="required" />
+      <%- include('field-error', { fieldName: "identity", fieldErrors }) %>
+      <div class="validator-hint">Enter valid email address</div>
 
-    <button type="submit" class="btn btn-neutral mt-4">Register</button>
-  </fieldset>
-</form>
+      <label class="label">Password</label>
+      <input 
+        name="password" 
+        type="password" 
+        class="validator input<%= fieldErrors && fieldErrors.password ? ' input-error' : '' %>" 
+        placeholder="Password"
+        minlength="8"
+        maxlength="71"
+        required="required"/>
+      <%- include('field-error', { fieldName: "password", fieldErrors }) %>
+      <div class="validator-hint">Enter valid password</div>
+
+      <button type="submit" class="btn btn-neutral mt-4">Register</button>
+    </fieldset>
+  </form>

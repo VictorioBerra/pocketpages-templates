@@ -1,57 +1,112 @@
 <script server>
+
+  const Ajv = require("ajv");
+  const ajv = new Ajv({ allErrors: true });
+  const addFormats = require("ajv-formats")
+  addFormats(ajv)
+  require("ajv-errors")(ajv);
+
+  const {
+    validateFormWithSchema,
+    handlePocketbaseError
+  } = resolve('form-helpers');
+
   const {
     token
   } = params
 
+  // ajv schema for login
+  const loginSchema = {
+    type: 'object',
+    required: ['password', 'confirmPassword'],
+    properties: {
+      password: { 
+        type: 'string', 
+        minLength: 8,
+        maxLength: 71,
+      },
+      confirmPassword: { 
+        type: 'string', 
+        minLength: 8,
+        maxLength: 71,
+      }
+    },
+    errorMessage: {
+      type: 'Invalid data type',
+      required: {
+        password: 'Password is required',
+        confirmPassword: 'Confirm Password is required'
+      },
+      properties: {
+        password: 'Password is invalid',
+        confirmPassword: 'Confirm Password is invalid'
+      }
+    },
+    additionalProperties: false
+  };
+
   let serverError = null
   let fieldErrors = {}
+  let data = {}
 
   if (request.method === 'POST') {
 
-    const client = pb();
+    data = formData();
 
-    const {
-      newPassword,
-      confirmPassword,
-    } = body()
-
-    if (newPassword !== confirmPassword) {
-      fieldErrors.password = { message: 'Passwords do not match' }
-      serverError = 'Passwords do not match'
+    const validation = validateFormWithSchema(data, loginSchema, ajv, dbg);
+    if (!validation.valid) {
+      fieldErrors = validation.fieldErrors;
+      serverError = validation.serverError;
     } else {
       try {
-        client.collection('users').confirmPasswordReset(
+        pb().collection('users').confirmPasswordReset(
           token,
-          newPassword,
-          confirmPassword,
+          data.password,
+          data.confirmPassword,
         );
-
         redirect('/auth/login', {
             message: 'Your password has been reset, you can now login.',
         })
       } catch (e) {
-        // Try to extract field-level errors from PocketBase error response
-        if (e && e.response && e.response.data) {
-          fieldErrors = e.response.data
-        }
-        serverError = e.message
+        const handled = handlePocketbaseError(e, dbg);
+        fieldErrors = handled.fieldErrors;
+        serverError = handled.serverError;
       }
     }
   }
 </script>
 
-<%- include('server-error', { serverError }) %>
+  <form method="post" class="p-6 max-w-sm mx-auto">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
-<form method="post" class="p-6 max-w-sm mx-auto">
-  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-    <legend class="fieldset-legend">Password Reset</legend>
+      <%- include('server-error', { serverError }) %>
 
-      <label class="label">New Password</label>
-      <input name="newPassword" type="password" class="input input-bordered w-full" required />
+      <legend class="fieldset-legend">Confirm Password Reset</legend>
 
-      <label class="label">Confirm New Password</label>
-      <input name="confirmPassword" type="password" class="input input-bordered w-full" required />
+      <label class="label">Password</label>
+      <input 
+        name="password" 
+        type="password" 
+        class="validator input<%= fieldErrors && fieldErrors.password ? ' input-error' : '' %>" 
+        placeholder="Password"
+        minlength="8"
+        maxlength="71"
+        required="required"/>
+      <%- include('field-error', { fieldName: "password", fieldErrors }) %>
+      <div class="validator-hint">Enter valid password</div>
 
-    <button type="submit" class="btn btn-neutral mt-4">Reset Password</button>
-  </fieldset>
-</form>
+      <label class="label">Confirm Password</label>
+      <input 
+        name="confirmPassword" 
+        type="password" 
+        class="validator input<%= fieldErrors && fieldErrors.confirmPassword ? ' input-error' : '' %>" 
+        placeholder="Confirm Password"
+        minlength="8"
+        maxlength="71"
+        required="required"/>
+      <%- include('field-error', { fieldName: "confirmPassword", fieldErrors }) %>
+      <div class="validator-hint">Enter valid password</div>
+
+      <button type="submit" class="btn btn-neutral mt-4">Confirm Password Reset</button>
+    </fieldset>
+  </form>

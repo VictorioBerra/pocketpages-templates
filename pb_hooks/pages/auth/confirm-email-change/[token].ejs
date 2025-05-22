@@ -1,47 +1,89 @@
 <script server>
+
+  const Ajv = require("ajv");
+  const ajv = new Ajv({ allErrors: true });
+  const addFormats = require("ajv-formats")
+  addFormats(ajv)
+  require("ajv-errors")(ajv);
+
+  const {
+    validateFormWithSchema,
+    handlePocketbaseError
+  } = resolve('form-helpers');
+
   const {
     token
   } = params
 
+  // ajv schema for login
+  const loginSchema = {
+    type: 'object',
+    required: ['password'],
+    properties: {
+      password: { 
+        type: 'string', 
+        minLength: 8,
+        maxLength: 71,
+      },
+    },
+    errorMessage: {
+      type: 'Invalid data type',
+      required: {
+        password: 'Password is required',
+      },
+      properties: {
+        password: 'Password is invalid',
+      }
+    },
+    additionalProperties: false
+  };
+
   let serverError = null
   let fieldErrors = {}
+  let data = {}
 
   if (request.method === 'POST') {
 
-    const client = pb();
+    data = formData();
 
-    const {
-      password,
-    } = body()
-
-    try {
-      client.collection('users').confirmEmailChange(token, password);
-
-      redirect('/auth/login', {
-        message: 'Your email has been changed. You will need to login again.',
-      })
-    } catch (e) {
-      // Try to extract field-level errors from PocketBase error response
-      if (e && e.response && e.response.data) {
-        fieldErrors = e.response.data
+    const validation = validateFormWithSchema(data, loginSchema, ajv, dbg);
+    if (!validation.valid) {
+      fieldErrors = validation.fieldErrors;
+      serverError = validation.serverError;
+    } else {
+      try {
+        pb().collection('users').confirmEmailChange(token, data.password);
+        redirect('/auth/login', {
+          message: 'Your email has been changed. You will need to login again.',
+        })
+      } catch (e) {
+        const handled = handlePocketbaseError(e, dbg);
+        fieldErrors = handled.fieldErrors;
+        serverError = handled.serverError;
       }
-      error = e.message
     }
   }
 </script>
 
-<%- include('server-error', { serverError }) %>
+  <form method="post" class="p-6 max-w-sm mx-auto">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
-<form method="post" class="p-6 max-w-sm mx-auto space-y-4">
-  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+      <%- include('server-error', { serverError }) %>
 
-    <legend class="fieldset-legend">Change Password</legend>
+      <legend class="fieldset-legend">Confirm Password Reset</legend>
 
-    <p class="text-sm text-gray-500 mb-4">
-      Please enter your password to confirm the email change.
-    </p>
+      <label class="label">Password</label>
+      <input 
+        name="password" 
+        type="password" 
+        class="validator input<%= fieldErrors && fieldErrors.password ? ' input-error' : '' %>" 
+        placeholder="Password"
+        minlength="8"
+        maxlength="71"
+        required="required"/>
+      <%- include('field-error', { fieldName: "password", fieldErrors }) %>
+      <div class="validator-hint">Enter valid password</div>
 
-    <input name="confirmPassword" type="password" class="input input-bordered w-full" required />
-    <button class="btn btn-neutral mt-4">Confirm Email Change</button>
-  </fieldset>
-</form>
+      <button type="submit" class="btn btn-neutral mt-4">Confirm Email Change</button>
+    </fieldset>
+  </form>

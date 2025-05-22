@@ -1,42 +1,83 @@
 <script server>
 
+  const Ajv = require("ajv");
+  const ajv = new Ajv({ allErrors: true });
+  const addFormats = require("ajv-formats")
+  addFormats(ajv)
+  require("ajv-errors")(ajv);
+
+  const {
+    validateFormWithSchema,
+    handlePocketbaseError
+  } = resolve('form-helpers');
+
+  // ajv schema for login
+  const loginSchema = {
+    type: 'object',
+    required: ['identity'],
+    properties: {
+      identity: {
+        type: 'string',
+        format: 'email',
+      },
+    },
+    errorMessage: {
+      type: 'Invalid data type',
+      required: {
+        identity: 'Email is required',
+      },
+      properties: {
+        identity: 'Invalid email address',
+      }
+    },
+    additionalProperties: false
+  };
+
   let serverError = null
   let fieldErrors = {}
+  let data = {}
 
   if (request.method === 'POST') {
-    const {
-      email,
-    } = body()
 
-    const client = pb();
+    data = formData();
 
-    try {
-      client.collection('users').requestPasswordReset(email);
-      redirect(`/`, {
-        message: 'Password reset email sent, please check your inbox.',
-      })
-    } catch (e) {
-      // Try to extract field-level errors from PocketBase error response
-      if (e && e.response && e.response.data) {
-        fieldErrors = e.response.data
+    const validation = validateFormWithSchema(data, loginSchema, ajv, dbg);
+    if (!validation.valid) {
+      fieldErrors = validation.fieldErrors;
+      serverError = validation.serverError;
+    } else {
+      try {
+        pb().collection('users').requestPasswordReset(data.email);
+        redirect(`/`, {
+          message: 'Password reset email sent, please check your inbox.',
+        })
+      } catch (e) {
+        const handled = handlePocketbaseError(e, dbg);
+        fieldErrors = handled.fieldErrors;
+        serverError = handled.serverError;
       }
-      serverError = e.message
     }
   }
 </script>
 
-<%- include('server-error', { serverError }) %>
+  <form method="post" class="p-6 max-w-sm mx-auto">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
-<form method="post" class="p-6 max-w-sm mx-auto">
-  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-    <legend class="fieldset-legend">Forgot Password</legend>
+      <%- include('server-error', { serverError }) %>
 
-    <label class="label">Email</label>
-    <input name="email" value="<%= data.identity %>" type="email" class="input" placeholder="Email" required />
-    <% if (fieldErrors && fieldErrors.email) { %>
-      <p class="validator-hint text-error mt-1"><%= fieldErrors.email.message %></p>
-    <% } %>
+      <legend class="fieldset-legend">Forgot Password</legend>
 
-    <button type="submit" class="btn btn-neutral mt-4">Reset Password</button>
-  </fieldset>
-</form>
+      <label class="label">Email</label>
+      <input 
+        name="identity" 
+        value="<%= data.identity %>" 
+        type="email"
+        class="validator input<%= fieldErrors && fieldErrors.identity ? ' input-error' : '' %>" 
+        placeholder="Email"
+        required="required" />
+      <%- include('field-error', { fieldName: "identity", fieldErrors }) %>
+      <div class="validator-hint">Enter valid email address</div>
+
+      <button type="submit" class="btn btn-neutral mt-4">Reset Password</button>
+    </fieldset>
+  </form>
