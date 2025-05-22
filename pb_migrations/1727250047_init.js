@@ -7,7 +7,7 @@ migrate((app) => {
 
     const smtp = settings.smtp
     smtp.enabled = true
-    smtp.host = 'localhost'
+    smtp.host = 'mailhog'
     smtp.port = 1025
 
     app.save(settings)

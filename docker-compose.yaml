@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   pocketbase:
     build:
@@ -7,8 +5,10 @@ services:
       args:
         PB_VERSION: 0.28.1
     container_name: pocketbase-app
+    environment:
+      - PB_PORT=8090
     ports:
-      - "8090:8080"
+      - "8090:8090"      
     # volumes:
     #   - ./pb_data:/pb/pb_data
   mailhog:
