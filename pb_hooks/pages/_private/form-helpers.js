@@ -25,7 +25,7 @@ function _processAjvFieldErrors(ajvErrors) {
 }
 
 module.exports = {
-    validateFormWithSchema(formData, schema, ajvInstance) {
+    validateFormWithSchema(formData, schema, ajvInstance, dbg) {
         const validate = ajvInstance.compile(schema);
         const valid = validate(formData);
         if (valid) {
@@ -34,15 +34,19 @@ module.exports = {
             const fieldErrors = _processAjvFieldErrors(validate.errors);
             // Prettified error: join all messages
             const serverError = Object.values(fieldErrors).map(e => e.message).join(' | ');
-            return {
+            const response = {
                 valid: false,
                 data: null,
                 fieldErrors,
                 serverError
             };
+
+            dbg('AJV Server-Side Validation Errors:', fieldErrors);
+
+            return response;
         }
     },
-    handlePocketbaseError(e) {
+    handlePocketbaseError(e, dbg) {
         let fieldErrors = {};
         let serverError = e && e.message ? e.message : 'An unknown error occurred.';
         if (
@@ -59,6 +63,14 @@ module.exports = {
                 serverError = e.response.message;
             }
         }
-        return { fieldErrors, serverError };
+
+        const response = {
+            fieldErrors,
+            serverError
+        };
+
+        dbg('Pocketbase API Validation Errors:', response);
+
+        return response;
     }
 };
