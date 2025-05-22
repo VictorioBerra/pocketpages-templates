@@ -59,6 +59,8 @@
           message: 'Registration successful. Please check your email to verify your account.'
         })
       } catch (e) {
+        //error(e)
+        error(e.originalError)
         const handled = handlePocketbaseError(e, dbg);
         fieldErrors = handled.fieldErrors;
         serverError = handled.serverError;

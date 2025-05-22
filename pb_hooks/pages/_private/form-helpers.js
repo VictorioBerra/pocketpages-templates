@@ -47,6 +47,10 @@ module.exports = {
         }
     },
     handlePocketbaseError(e, dbg) {
+
+        dbg('Pocketbase Errors:', e);
+        dbg('Pocketbase Errors (Orig):', e.originalError);
+
         let fieldErrors = {};
         let serverError = e && e.message ? e.message : 'An unknown error occurred.';
         if (
@@ -68,8 +72,6 @@ module.exports = {
             fieldErrors,
             serverError
         };
-
-        dbg('Pocketbase API Validation Errors:', response);
 
         return response;
     }
