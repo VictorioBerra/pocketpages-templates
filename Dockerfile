@@ -26,8 +26,6 @@ RUN npm run lint:ejs
 # --- Final image ---
 FROM alpine:latest
 
-ENV PB_PORT=8080
-
 # Copy PocketBase binary from build stage
 COPY --from=build /pb/pocketbase /pb/pocketbase
 COPY --from=build /app/pb_hooks /pb/pb_hooks
@@ -36,6 +34,6 @@ COPY ./pb_migrations /pb/pb_migrations
 
 WORKDIR /pb
 
-EXPOSE ${PB_PORT}
+EXPOSE 8090
 
-CMD ["/bin/sh", "-c", "./pocketbase serve --http=0.0.0.0:${PB_PORT}"]
+CMD ["/bin/sh", "-c", "./pocketbase serve --http=0.0.0.0:8090"]

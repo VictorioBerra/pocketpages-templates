@@ -21,7 +21,7 @@
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^3.0.1",
     "daisyui": "^5.0.35",
-    "pocketpages": "^0.16.0",
+    "pocketpages": "^0.18.1",
     "pocketpages-plugin-auth": "^0.2.0",
     "pocketpages-plugin-js-sdk": "^0.1.0",
     "pocketpages-plugin-micro-dash": "^0.1.0",

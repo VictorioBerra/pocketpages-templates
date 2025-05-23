@@ -32,10 +32,11 @@ test('register an account', async ({ page }) => {
   await page.waitForURL(new RegExp(`${host}/\\?__flash=.+`));
 
   // Check if the registration was successful, page should include a div with the text "Registration successful. Please check your email to verify your account."
-  const successMessage = await page.locator('div').filter({ hasText: /Registration successful.*/i });
+  const successMessage = await page.locator('div').filter({ hasText: "Registration successful. Please check your email to verify your account." });
+  expect(await successMessage.count()).toBe(1); // <-- Assert before navigation
+
 
   // Access MailHog API, get email to verify the account. Might need to get all emails to user and filter?
-  // Body of email is <p>Hello,</p>\n<p>Thank you for joining us at {APP_NAME}.</p>\n<p>Click on the button below to verify your email address.</p>\n<p>\n  <a class=\"btn\" href=\"{APP_URL}/auth/confirm-verification/{TOKEN}\" target=\"_blank\" rel=\"noopener\">Verify</a>\n</p>\n<p>\n  Thanks,<br/>\n  {APP_NAME} team\n</p>
   const result = await mailhog.latestTo(emailAddress);
 
   const body = result.Content.Body;
@@ -47,19 +48,12 @@ test('register an account', async ({ page }) => {
 
   const cleanedVerifyLink = match ? match[1] : null;
 
-  console.log(cleanedVerifyLink);
-
-  // thread sleep
-  await new Promise(resolve => setTimeout(resolve, 30000));
-
   // Go to the verification link
   await page.goto(cleanedVerifyLink);
 
   // Check if the verification was successful, page should include a div with the text "Email address verified. You can now log in."
-  await page.waitForURL(new RegExp(`${host}/auth/login?__flash=.+`));
+  await page.waitForURL(new RegExp(`${host}/auth/login\\?__flash=.+`));
 
-  const loginMessage = await page.locator('div').filter({ hasText: /Your account has been verified*/i });
-
-  expect(await successMessage.count()).toBe(1);
+  const loginMessage = await page.locator('div').filter({ hasText: "Your account has been verified, you can now login." });
   expect(await loginMessage.count()).toBe(1);
 });

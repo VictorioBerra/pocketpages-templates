@@ -1,9 +1,14 @@
-module.exports = {
-  plugins: [
-    'pocketpages-plugin-auth',
-    'pocketpages-plugin-js-sdk', // TODO: Need access to env() to set port here
-    'pocketpages-plugin-ejs',
-    'pocketpages-plugin-micro-dash',
-  ],
-  debug: true,
+module.exports = function(api) {
+  return {
+    plugins: [
+      'pocketpages-plugin-auth',
+      {
+        name: 'pocketpages-plugin-js-sdk',
+        debug: api.env('POCKETPAGESJSSDK_DEBUG') ? true : false,
+      },
+      'pocketpages-plugin-ejs',
+      'pocketpages-plugin-micro-dash',
+    ],
+    debug: api.env('POCKETPAGES_DEBUG') ? true : false,
+  };
 }

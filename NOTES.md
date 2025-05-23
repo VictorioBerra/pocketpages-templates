@@ -5,6 +5,10 @@
 - http://tailwindcss.com/docs/
 - https://pocketbase.io/jsvm/interfaces/ handy for migrations and other PB JSVM types
 
+Mailhog:
+
+`docker compose up mailhog`
+
 For OAuth, OTP, anonymous, MFA pull these in: https://github.com/benallfree/pocketpages/tree/main/packages/plugins/auth
 
 ## Notes
