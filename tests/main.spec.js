@@ -18,7 +18,7 @@ function extractVerifyLinkFromBody(body) {
 }
 
 test.beforeAll(async () => {
-  // await buildOne('pocketbase', { cwd: path.join(__dirname), log: true });
+  await buildOne('pocketbase', { cwd: path.join(__dirname), log: true });
   await upAll({ cwd: path.join(__dirname), log: true });
 });
 
