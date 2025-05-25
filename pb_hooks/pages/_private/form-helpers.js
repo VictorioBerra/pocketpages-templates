@@ -32,8 +32,8 @@ module.exports = {
             return { valid: true, data: formData, fieldErrors: {}, prettified: '' };
         } else {
             const fieldErrors = _processAjvFieldErrors(validate.errors);
-            // Prettified error: join all messages
-            const serverError = Object.values(fieldErrors).map(e => e.message).join(' | ');
+            // Use ajv.errorsText for a robust serverError string
+            const serverError = ajvInstance.errorsText(validate.errors, { separator: ' | ' });
             const response = {
                 valid: false,
                 data: null,
