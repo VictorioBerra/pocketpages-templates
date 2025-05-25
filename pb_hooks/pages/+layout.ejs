@@ -37,7 +37,7 @@
   <main class="container mx-auto p-4">
 
       <% if(params.__flash) { %>
-        <div class="alert alert-info shadow-sm mb-4"><%= params.__flash %></div>
+        <div data-testid="flashContainer" class="alert alert-info shadow-sm mb-4"><%= params.__flash %></div>
       <% } %>
 
     <%- slot %>
