@@ -65,7 +65,7 @@
   }
 </script>
 
-  <form method="post" action="/auth/confirm/email-change" class="p-6 max-w-sm mx-auto">
+  <form method="post" action="/auth/confirm/email-change/<%= token %>" class="p-6 max-w-sm mx-auto">
     <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
       <%- include('server-error', { serverError }) %>
