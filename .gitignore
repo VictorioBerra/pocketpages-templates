@@ -172,3 +172,4 @@ pocketbase
 /blob-report/
 /playwright/.cache/
 screenshot.png
+ajv.js
