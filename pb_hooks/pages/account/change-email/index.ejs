@@ -35,19 +35,19 @@
 
   let serverError = null
   let fieldErrors = {}
-  let data = {}
+  let parsedFormData = {}
 
   if (request.method === 'POST') {
 
-    data = formData();
+    parsedFormData = formData();
 
-    const validation = validateFormWithSchema(data, loginSchema, ajv, dbg);
+    const validation = validateFormWithSchema(parsedFormData, loginSchema, ajv, dbg);
     if (!validation.valid) {
       fieldErrors = validation.fieldErrors;
       serverError = validation.serverError;
     } else {
       try {
-        const user = pb({ request }).collection('users').requestEmailChange(data.identity)
+        const user = pb({ request }).collection('users').requestEmailChange(parsedFormData.identity)
         redirect(`/`, {
             message: 'Email change requested, please check your email.',
         })
@@ -60,7 +60,7 @@
   }
 </script>
 
-  <form method="post" class="p-6 max-w-sm mx-auto">
+  <form method="post" action="/account/change-email" class="p-6 max-w-sm mx-auto">
     <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
       <%- include('server-error', { serverError }) %>
@@ -70,7 +70,7 @@
       <label class="label">Email</label>
       <input 
         name="identity" 
-        value="<%= data.identity %>" 
+        value="<%= parsedFormData.identity %>" 
         type="email"
         class="validator input<%= fieldErrors && fieldErrors.identity ? ' input-error' : '' %>" 
         placeholder="Email"

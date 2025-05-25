@@ -40,19 +40,19 @@
 
   let serverError = null
   let fieldErrors = {}
-  let data = {}
+  let parsedFormData = {}
 
   if (request.method === 'POST') {
 
-    data = formData();
+    parsedFormData = formData();
 
-    const validation = validateFormWithSchema(data, loginSchema, ajv, dbg);
+    const validation = validateFormWithSchema(parsedFormData, loginSchema, ajv, dbg);
     if (!validation.valid) {
       fieldErrors = validation.fieldErrors;
       serverError = validation.serverError;
     } else {
       try {
-        pb().collection('users').confirmEmailChange(token, data.password);
+        pb().collection('users').confirmEmailChange(token, parsedFormData.password);
         redirect('/auth/login', {
           message: 'Your email has been changed. You will need to login again.',
         })
@@ -65,7 +65,7 @@
   }
 </script>
 
-  <form method="post" class="p-6 max-w-sm mx-auto">
+  <form method="post" action="/auth/confirm/email-change" class="p-6 max-w-sm mx-auto">
     <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
       <%- include('server-error', { serverError }) %>

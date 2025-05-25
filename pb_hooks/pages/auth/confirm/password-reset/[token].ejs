@@ -29,7 +29,7 @@
         type: 'string', 
         minLength: 8,
         maxLength: 71,
-      }
+      },
     },
     errorMessage: {
       type: 'Invalid data type',
@@ -47,13 +47,13 @@
 
   let serverError = null
   let fieldErrors = {}
-  let data = {}
+  let parsedFormData = {}
 
   if (request.method === 'POST') {
 
-    data = formData();
+    parsedFormData = formData();
 
-    const validation = validateFormWithSchema(data, loginSchema, ajv, dbg);
+    const validation = validateFormWithSchema(parsedFormData, loginSchema, ajv, dbg);
     if (!validation.valid) {
       fieldErrors = validation.fieldErrors;
       serverError = validation.serverError;
@@ -61,8 +61,8 @@
       try {
         pb().collection('users').confirmPasswordReset(
           token,
-          data.password,
-          data.confirmPassword,
+          parsedFormData.password,
+          parsedFormData.confirmPassword,
         );
         redirect('/auth/login', {
             message: 'Your password has been reset, you can now login.',
@@ -76,7 +76,7 @@
   }
 </script>
 
-  <form method="post" class="p-6 max-w-sm mx-auto">
+  <form method="post" action="/auth/confirm/password-reset" class="p-6 max-w-sm mx-auto">
     <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
       <%- include('server-error', { serverError }) %>

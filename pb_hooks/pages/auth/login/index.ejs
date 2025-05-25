@@ -24,7 +24,7 @@
         type: 'string', 
         minLength: 8,
         maxLength: 71,
-      }
+      },
     },
     errorMessage: {
       type: 'Invalid data type',
@@ -42,13 +42,15 @@
 
   let serverError = null
   let fieldErrors = {}
-  let data = {}
+  let parsedFormData = {}
 
   if (request.method === 'POST') {
 
-    data = formData();
+    parsedFormData = formData();
 
-    const validation = validateFormWithSchema(data, loginSchema, ajv);
+    echo(parsedFormData)
+
+    const validation = validateFormWithSchema(parsedFormData, loginSchema, ajv, dbg);
     if (!validation.valid) {
       fieldErrors = validation.fieldErrors;
       serverError = validation.serverError;
@@ -56,7 +58,7 @@
       try {
         const authData = pb()
           .collection('users')
-          .authWithPassword(data.identity, data.password);
+          .authWithPassword(parsedFormData.identity, parsedFormData.password);
         if (authData.record.verified) {
           api.signIn(authData)
           redirect(`/`)
@@ -72,7 +74,7 @@
   }
 </script>
 
-  <form method="post" class="p-6 max-w-sm mx-auto">
+  <form method="post" action="/auth/login" class="p-6 max-w-sm mx-auto">
     <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
       <%- include('server-error', { serverError }) %>
@@ -82,7 +84,7 @@
       <label class="label">Email</label>
       <input 
         name="identity" 
-        value="<%= data.identity %>" 
+        value="<%= parsedFormData.identity %>" 
         type="email"
         class="validator input<%= fieldErrors && fieldErrors.identity ? ' input-error' : '' %>" 
         placeholder="Email"

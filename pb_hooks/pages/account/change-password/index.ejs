@@ -34,7 +34,7 @@
         type: 'string', 
         minLength: 8,
         maxLength: 71,
-      }
+      },
     },
     errorMessage: {
       type: 'Invalid data type',
@@ -54,13 +54,13 @@
 
   let serverError = null
   let fieldErrors = {}
-  let data = {}
+  let parsedFormData = {}
 
   if (request.method === 'POST') {
 
-    data = formData();
+    parsedFormData = formData();
 
-    const validation = validateFormWithSchema(data, loginSchema, ajv, dbg);
+    const validation = validateFormWithSchema(parsedFormData, loginSchema, ajv, dbg);
     if (!validation.valid) {
       fieldErrors = validation.fieldErrors;
       serverError = validation.serverError;
@@ -72,7 +72,7 @@
           passwordConfirm: confirmPassword,
         })
 
-        redirect(`/`, {
+        redirect(`/auth/login`, {
           message: 'Password changed successfully, you will need to login again.',
         })
       } catch (e) {
@@ -84,7 +84,7 @@
   }
 </script>
 
-  <form method="post" class="p-6 max-w-sm mx-auto">
+  <form method="post" action="/account/change-password" class="p-6 max-w-sm mx-auto">
     <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">      
 
       <%- include('server-error', { serverError }) %>
