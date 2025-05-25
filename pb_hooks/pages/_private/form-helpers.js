@@ -32,6 +32,9 @@ module.exports = {
             return { valid: true, data: formData, fieldErrors: {}, prettified: '' };
         } else {
             const fieldErrors = _processAjvFieldErrors(validate.errors);
+            
+            dbg('AJV Server-Side Validation Errors:', validate.errors);
+
             // Use ajv.errorsText for a robust serverError string
             const serverError = ajvInstance.errorsText(validate.errors, { separator: ' | ' });
             const response = {
@@ -41,7 +44,7 @@ module.exports = {
                 serverError
             };
 
-            dbg('AJV Server-Side Validation Errors:', validate.errors);
+            dbg('AJV Server-Side Validation Response:', response);
 
             return response;
         }
@@ -72,6 +75,8 @@ module.exports = {
             fieldErrors,
             serverError
         };
+
+        dbg('Pocketbase Error Response:', response);
 
         return response;
     }
