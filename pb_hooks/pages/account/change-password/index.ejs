@@ -18,7 +18,7 @@
   // ajv schema for login
   const loginSchema = {
     type: 'object',
-    required: ['password', 'confirmPassword'],
+    required: ['currentPassword', 'newPassword', 'confirmPassword'],
     properties: {    
       currentPassword: { 
         type: 'string', 
@@ -67,9 +67,9 @@
     } else {
       try {
         const user = pb({ request }).collection('users').update(auth.id, {
-          oldPassword: currentPassword,
-          password: newPassword,
-          passwordConfirm: confirmPassword,
+          oldPassword: parsedFormData.currentPassword,
+          password: parsedFormData.newPassword,
+          passwordConfirm: parsedFormData.confirmPassword,
         })
 
         redirect(`/auth/login`, {
