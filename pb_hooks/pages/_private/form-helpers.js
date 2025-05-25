@@ -41,7 +41,7 @@ module.exports = {
                 serverError
             };
 
-            dbg('AJV Server-Side Validation Errors:', fieldErrors);
+            dbg('AJV Server-Side Validation Errors:', validate.errors);
 
             return response;
         }
