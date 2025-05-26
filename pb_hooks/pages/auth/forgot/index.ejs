@@ -47,7 +47,7 @@
       serverError = validation.serverError;
     } else {
       try {
-        pb().collection('users').requestPasswordReset(parsedFormData.email);
+        pb().collection('users').requestPasswordReset(parsedFormData.identity);
         redirect(`/`, {
           message: 'Password reset email sent, please check your inbox.',
         })
