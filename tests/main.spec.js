@@ -1,6 +1,5 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
-import PocketBase from 'pocketbase'
 const mailhog = require('mailhog')();
 
 const SUPERUSER_IDENTITY = 'test@test.com';
