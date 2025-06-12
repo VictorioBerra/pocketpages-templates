@@ -1,6 +1,10 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import PocketBase from 'pocketbase'
 const mailhog = require('mailhog')();
+
+const SUPERUSER_IDENTITY = 'test@test.com';
+const SUPERUSER_PASSWORD = 'test_password1234';
 
 const TEST_EMAIL = 'testuser@example.com';
 const TEST_PASSWORD = 'test_password1234';
@@ -8,6 +12,7 @@ const TEST_PASSWORD = 'test_password1234';
 // Shared state for test flows
 let LATEST_PASSWORD = 'test_password1234';
 let NEW_EMAIL = 'changeduser@example.com';
+let SUPERUSER_TOKEN = null;
 
 // Helper to extract the body from a MailHog message
 function getMailBody(result) {
@@ -44,6 +49,25 @@ async function expectLoggedIn(page) {
   const logoutLink = await page.locator('a[href="/account/logout"]');
   expect(await logoutLink.count()).toBe(1);
 }
+
+test('Can hit health API of Pocketbase', async ({ request }) => {
+  const response = await request.get('/api/health');
+  const data = await response.json();
+  expect(data.message).toBe("API is healthy.");
+});
+
+test('Can get users as superuser', async ({ request }) => {
+  const response = await request.post('/api/collections/_superusers/auth-with-password', {
+    data: {
+      identity: SUPERUSER_IDENTITY,
+      password: SUPERUSER_PASSWORD,
+    }
+  });
+  const data = await response.json();
+  expect(data.token).toBeDefined();
+
+  SUPERUSER_TOKEN = data.token;
+});
 
 test('register an account (registration only)', async ({ page }) => {
   await page.goto(`/auth/register`);
